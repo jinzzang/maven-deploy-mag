@@ -1,0 +1,190 @@
+
+Artifact ID : 프로젝트 진행시 해당 ID를 사용한다. 이 이름으로된 jar파일이 생성됨.
+NAME : 물리적으로 생성되는 프로젝트의 이름
+
+프로젝트 인코딩 설정
+<properties>
+	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	<java.version>17</java.version>
+</properties>
+
+어떤 버전으로 컴파일 할 것인지
+<maven.compiler.source>17</maven.compiler.source>
+<maven.compiler.target>17</maven.compiler.target>
+
+// 소스는 17로 작성되었고 컴파일된 클래스 파일의 대상이 17버전으로 되어있습니다. 소스와 target이 일치해야 오류가 발생하지 않는다.
+
+오래 걸리는 작업을 넘긴다.
+<maven.test.skip>true</maven.test.skip>
+
+아티팩트 : 메이븐에서는 빌드의 결과로 생기는 jar, war 등을 의미이다. 다른곳에서는 의미가 다를 수 있다.
+
+<packaging>pom</packaging>
+pom : Project Object Model
+war,jar라면 실제로 빌드되는 아티팩트(빌드 결과물)을 생성해야 할텐데 pom으로
+패키징을 하면 아티팩트가 생성되는것이 아닌 Maven 프로젝트의 설정 및 의존성을 관리하는 데 사용된다. 일반적으로 부모 프로젝트나 집합 프로젝트에서 사용되며 다른 모듈 프로젝트에 대한 공통 설정을 제공함. 결론 : 다른 모듈에 대해 공통 설정을 제공한다.
+
+<properties> : 프로젝트의 공통 속성을 관리하는 태그이다.
+
+ <properties>
+        <java.version>1.8</java.version>
+        <spring.version>5.2.5</spring.version>
+        <database.driver>com.mysql.jdbc.Driver</database.driver>
+    </properties>
+    
+    <!-- 의존성 선언 -->
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${database.driver}</version>
+        </dependency>
+    </dependencies>
+
+이런식으로 properties의 값을 dependecy안에 ${} 변수 형태로 집어넣을 수 있다.
+
+<repositories> : 종속성 및 확장을 검색하기 위한 원격 저장소 목록을 명시합니다. 
+
+<repository> : 원격 리포지토리에 배포하는 데 필요한 정보를 명시합니다.
+![Alt text](image-4.png)
+
+element type
+id      String  저장소의 고유 식별자. 예를들어 settings.xml파일의 구성과 저장소를 일치시키는데 사용됩니다.
+
+name : 사람이 읽을 수 있는 저장소
+
+
+    <build>
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    ${basedir} : 프로젝트 기본 디렉토리
+
+    settings.xml : Maven실행에 필요한 설정들을 정의하는 파일이다.
+    pom.xml에 안 넣고 settings.xml을 따로 만드는 이유 : 특정 프로젝트에 종속되는 정보가 아니다.
+
+ex)
+    <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+    <localRepository/>
+    <interactiveMode/>
+    <offline/>
+    <pluginGroups/>
+    <servers/>
+    <mirrors/>
+    <proxies/>
+    <profiles/>
+    <activeProfiles/>
+</settings>
+
+pluginGroups : pom.xml에 groupId가 설정되어 있지 않을 때 선언된
+GroupId로 플러그인을 탐색
+
+proxies : 방화벽이나 SSL 이슈를 해결하기 위해 Proxy 설정을 합니다.
+
+servers : 저장소 서버에 관련된 설정
+        -   -저장소의 인증하는 방법을 제공합니다.
+
+<servers>
+    <server>
+      <id>server001</id>
+      <username>my_login</username>
+      <password>my_password</password>
+      <privateKey>${user.home}/.ssh/id_dsa</privateKey>
+      <passphrase>some_passphrase</passphrase>
+      <filePermissions>664</filePermissions>
+      <directoryPermissions>775</directoryPermissions>
+      <configuration></configuration>
+    </server>
+  </servers>
+
+이런식으로 작성함
+
+mirrors : 저장소에 대한 다운로드 mirror를 설정하는 속성
+
+미러 리포지토리는 Maven이 원격 리포지토리에서 의존성을 다운로드할 때 사용하는 대안 URL을 지정합니다. 
+
+repositories는 의존성을 다운받을 경로를 입력해주는것이다.
+
+	<repositories>
+		<repository>
+			<id>magnum-snapshot</id>
+			<name>nexus</name>
+			<url>https://nexus.magnum.i234.me/repository/maven-snapshots/</url>
+                <snapshots>
+                    <enabled>true</enabled>                 //snapshots 버전의 의존성을 가져와라
+                </snapshots>
+		</repository>
+
+		<repository>
+			<id>magnum-release</id>
+			<name>nexus</name>
+			<url>https://nexus.magnum.i234.me/repository/maven-releases/</url>
+			<snapshots>
+				<enabled>false</enabled>                // releases버전의 의존성을 가져오지 않는다.
+			</snapshots>
+		</repository>
+	</repositories>
+
+    //
+    위의 예시에서는 <snapshots>는 true로 설정되어 있으므로 해당 리포지토리에서 스냅샷 버전의 의존성을 가져올 수 있고, <releases>는 false로 설정되어 있으므로 해당 리포지토리에서 릴리스 버전의 의존성은 사용하지 않는 것으로 설정되어 있습니다. 이것은 이 리포지토리가 주로 개발 중인 버전을 지원하고 릴리스 버전은 포함하지 않는다는 것을 의미합니다.
+
+    <build> : 빌드 설정을 정의하는 부분
+    <sourceDirectory> : 소스코드가 어디에 있는지
+    ${basedir} : maven의 root 디렉토리
+    plugins : 빌드 과정중에 특정 작업을 수행하는 플러그인들을 설정 
+    maven-compiler-plugin: Java소스 코드를 컴파일하는데 사용
+    configuration : 플러그인 구성설정 , source와 target는 Java 컴파일러가 사용할 Java 버전을 지정합니다.
+
+    <distributionManagement> : Maven 프로젝트에서 프로젝트 릴리스와 스냅샷 배포를 관리하는 설정을 제공하는 부분이다. 
+        snapshotRepository : 스냅샷 릴리스을 저장하기 위한 리포지토리 정보를 설정한다.
+            id : 리포지토리 고유식별자
+            name : 리포지토리의 이름 
+            url : 스탭샷을 저장할 URL
+
+        repository : 릴리즈버전을 저장하기 위해 리포지토리 정보 설정
+            id
+            name
+            url
+
+
+mvn -s ./settings.xml  -U dependency:purge-local-repository clean package install deploy 
+
+mvn : 실행 
+-s ./settings.xml : Maven 설정 파일을 지정하는 옵션입니다.
+
+-U : 스냅샷의 의존성을 업데이트하도록 Maven에 지시한다.
+
+dependency:purge-local-repository : 로컬저장소에서 이전에 다운로드한 의존성을 정리하는 작업
+
+install : 패키징된 결과물을 로컬 저장소에 설치한다.  현재 프로젝트의 빌드 결과물을 개발자의 로컬 maven 저장소에 저장한다.
+
+deploy : 패키징된 결과물을 원격 maven저장소에 배포한다.
+
+
+setting.xml
+<servers> : 원격 리포지토리 또는 웹 서비스와 상호작용할 때 인증 정보를 저장하는 데 사용됩니다.
+id : magnum-release
+username : 서버 로그인 아이디
+password : 비밀번호
+
+<mirrors> :  원격 리포지토리에 미러링 및 리디렉션을 정의하는 데 사용함. 
+미러링이란 컴퓨터 네트워크에서 데이터를 복사해서 두 개이상의 위치에서 동일한 데이터를 유지하는것 
+

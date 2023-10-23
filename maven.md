@@ -1,0 +1,119 @@
+## Jenkins를 통한 Maven 프로젝트 환경 배포
+- ### pom.xml 설정
+- ### settings.xml
+- ### Jenkins 설정
+
+
+## pom.xml
+```
+    <groupId>com.magnum.all4esg</groupId>
+	<artifactId>all4esg-common</artifactId>
+	<name>all4esg-common</name>
+	<version>0.0.1-SNAPSHOT</version>
+	<description>all4esg-common</description>
+	<packaging>jar</packaging>
+
+```
+- groupId : 프로젝트를 생성하는 조직의 이름
+- artifactId : 프로젝트 이름
+- name : 소스 코드 패키지 이름
+- packaging : pom,war,jar 등등의 값을 넣을 수 있다.
+- pom (Project Object Model) : 일반적으로 부모 프로젝트나 집합프로젝트에서 사용되며 다른 모듈 프로젝트에 대한 공통 설정을 제공함.
+- war,jar라면 실제로 빌드되는 아티팩트(빌드 결과물)을 생성한다.
+- jar : 자바 플랫폼에 라이브러리를 배포하기 위한 소프트웨어 패키지
+- war : 웹 애플리케이션이 구동되기 위한 자원들을 한 군데 모아 배포하는 데 사용되는 파일
+
+
+```
+    <repositories>
+		<repository>
+			<id>magnum-snapshot</id>
+			<name>nexus</name>
+			<url>https://nexus.magnum.i234.me/repository/maven-snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>   //snapshots 버전의 의존성을 가져와라
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>magnum-release</id>
+			<name>nexus</name>
+			<url>https://nexus.magnum.i234.me/repository/maven-releases/</url>
+			<snapshots>
+				<enabled>false</enabled> // releases버전의 의존성을 가져오지 않는다.
+			</snapshots>
+		</repository>
+	</repositories>
+```
+- repositories : 의존성을 다운받을 경로를 입력해주는것
+- id : 디렉토리 이름 
+- name : 사람이 읽을 수 있는 저장소
+- url : 의존성을 가져올 경로
+- <snapshots><enabled>true</enabled></snapshots> : true이면 snapshots 버전의 의존성을 가져와라
+
+```
+    <distributionManagement>
+		<snapshotRepository>
+			<id>magnum-snapshot</id>
+			<name>magnum-snapshot</name>
+			<url>https://nexus.magnum.i234.me/repository/maven-snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>magnum-release</id>
+			<name>magnum-release</name>
+			<url>https://nexus.magnum.i234.me/repository/maven-releases/</url>
+		</repository>
+	</distributionManagement>
+```
+<distributionManagement> : Maven 프로젝트에서 프로젝트 릴리즈와 스냅샷 배포를 관리하는 설정을 제공하는 부분이다.
+
+snapshotRepository : 스냅샷 릴리스을 저장하기 위한 리포지토리 정보를 설정한다.
+    id : 리포지토리 고유식별자
+    name : 리포지토리의 이름 
+    url : 스탭샷을 저장할 URL
+
+repository : 릴리즈버전을 저장하기 위해 리포지토리 정보 설정
+    id
+    name
+    url
+
+## settings.xml
+
+settings.xml : Maven실행에 필요한 설정들을 정의하는 파일이다.
+
+pom.xml에 안 넣고 settings.xml을 따로 만드는 이유 : 특정
+프로젝트에 종속되는 정보가 아니다.
+
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+  <pluginGroups></pluginGroups>
+  <proxies></proxies>
+  <servers>
+    <server>
+      <id>magnum-release</id>
+      <username>nexus</username>
+      <password>Nexus0827!</password>
+    </server>
+    <server>
+      <id>magnum-snapshot</id>
+      <username>nexus</username>
+      <password>Nexus0827!</password>
+    </server>
+  </servers>
+  <mirrors>
+    <mirror>
+      <id>maven-default-http-blocker</id>
+      <mirrorOf>external:http:*</mirrorOf>
+      <name>Pseudo repository to mirror external repositories initially using HTTP.</name>
+      <url>http://0.0.0.0/</url>
+      <blocked>true</blocked>
+    </mirror>
+  </mirrors>
+  <profiles></profiles>
+</settings>
+
+
+
+
